@@ -29,5 +29,17 @@ jobs:
 
       - name: Execute Deployment Script on EC2
         run: |
-          ssh ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} \
-              'bash ~/src/py-fastapi-homework-5-ec2-deploy-task/commands/deploy.sh'
+          ssh -o StrictHostKeyChecking=no ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} << 'EOF'
+            cd ~/src/py-fastapi-homework-5-ec2-deploy-task
+
+            echo "Installing dos2unix if missing..."
+            sudo apt update
+            sudo apt install -y dos2unix
+
+            echo "Converting scripts to Unix format and setting execute permissions..."
+            dos2unix commands/*.sh
+            chmod +x commands/*.sh
+
+            echo "Running deployment script..."
+            bash commands/deploy.sh
+          EOF
